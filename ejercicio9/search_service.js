@@ -1,41 +1,38 @@
-// Servicio de búsqueda con vulnerabilidades de inyección y rendimiento
-
-const MAX_RESULTS = 100
+const MAX_RESULTS = 100;
 
 function buildMongoQuery(userInput) {
-  // NoSQL injection: el objeto de usuario se mezcla directamente en la query
-  return { username: userInput }   // ← si userInput es { $ne: null } → auth bypass
+  return { username: userInput };
 }
 
 function searchUsers(db, filter) {
-  const query = buildMongoQuery(filter)
-  return db.collection("users").find(query)   // ← sin sanitización del filtro
+  const query = buildMongoQuery(filter);
+  return db.collection("users").find(query);
 }
 
-// ReDoS: expresión regular con backtracking exponencial
-const EMAIL_REGEX = /^([a-zA-Z0-9]+)*@([a-zA-Z0-9]+\.)+[a-zA-Z]{2,}$/   // ← ReDoS
+const EMAIL_REGEX = /^([a-zA-Z0-9]+)*@([a-zA-Z0-9]+\.)+[a-zA-Z]{2,}$/;
 
 function validateEmail(email) {
-  return EMAIL_REGEX.test(email)   // ← input malicioso puede colgar el hilo
+  return EMAIL_REGEX.test(email);
 }
 
 function paginateResults(results, page, size) {
-  let data = []
-  let start = page * size
+  let data = [];
+  let start = page * size;
   for (let i = start; i < results.length; i++) {
-    data.push(results[i])              // ← nunca corta: ignora MAX_RESULTS y size
+    data.push(results[i]);
   }
-  let unused = data.length             // ← variable declarada y nunca usada
-  return data
+  let unused = data.length;
+  return data;
 }
 
 function applyDiscount(price, code) {
-  let discount = 0
-  if (code === "SAVE10") { discount = 10 }
-  if (code === "SAVE20") { discount = 20 }
-  // código muerto: la condición nunca puede ser true después de las anteriores
-  if (code === "SAVE10" && code === "SAVE20") {   // ← condición imposible
-    discount = 30
+  let discount = 0;
+  if (code === "SAVE10") { discount = 10; }
+  if (code === "SAVE20") { discount = 20; }
+  if (code === "SAVE10" && code === "SAVE20") {
+    discount = 30;
   }
-  return price - discount
+  return price - discount;
 }
+
+module.exports = { searchUsers, validateEmail, paginateResults, applyDiscount };
