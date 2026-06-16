@@ -1,37 +1,53 @@
-import sqlite3
+import os, sqlite3, hashlib, secrets, logging
 
-DB_PASSWORD = "admin123"
-SECRET_KEY = "mysecretkey"
+logging.basicConfig(level=logging.INFO)
+DATABASE = os.getenv("DATABASE", "users.db")
 
-DATABASE = "users.db"
+def _hash_password(password: str, salt: bytes = None) -> str:
+    salt = salt or secrets.token_bytes(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100_000)
+    return salt.hex() + ":" + dk.hex()
 
+def _verify_password(stored: str, provided: str) -> bool:
+    salt_hex, hash_hex = stored.split(":")
+    salt = bytes.fromhex(salt_hex)
+    dk = hashlib.pbkdf2_hmac("sha256", provided.encode(), salt, 100_000)
+    return dk.hex() == hash_hex
 
 def get_user(username: str, password: str) -> dict:
-    conn = sqlite3.connect(DATABASE)
-    query = f"SELECT * FROM users WHERE username='{username}'"
-    cursor = conn.execute(query)
-    user = cursor.fetchone()
-
-    if user and user[2] == password:
-        return {"status": "ok", "user": {"id": user[0], "username": user[1]}}
-    return {"status": "error", "message": "Invalid credentials"}
-
-
-def reset_password(user_id: int, new_pass: str) -> bool:
-    conn = sqlite3.connect(DATABASE)
-    conn.execute(
-        f"UPDATE users SET password='{new_pass}' WHERE id={user_id}"
-    )
-    print(f"Password reset for user {user_id}: {new_pass}")
-    return True
-
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            cur = conn.execute("SELECT id, username, password FROM users WHERE username = ?", (username,))
+            row = cur.fetchone()
+            if row and _verify_password(row[2], password):
+                return {"status": "ok", "user": {"id": row[0], "username": row[1]}}
+            return {"status": "error", "message": "Invalid credentials"}
+    except Exception as e:
+        logging.exception("DB error in get_user")
+        return {"status": "error", "message": "Server error"}
 
 def create_user(username: str, password: str, email: str) -> dict:
-    conn = sqlite3.connect(DATABASE)
-    conn.execute(
-        f"INSERT INTO users (username, password, email) "
-        f"VALUES ('{username}', '{password}', '{email}')"
-    )
-    conn.commit()
-    conn.close()
-    return {"status": "created", "username": username}
+    pw_hash = _hash_password(password)
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            conn.execute(
+                "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+                (username, pw_hash, email),
+            )
+        return {"status": "created", "username": username}
+    except sqlite3.IntegrityError:
+        return {"status": "error", "message": "User exists"}
+    except Exception:
+        logging.exception("DB error in create_user")
+        return {"status": "error", "message": "Server error"}
+
+def reset_password(user_id: int, new_pass: str) -> bool:
+    pw_hash = _hash_password(new_pass)
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            conn.execute("UPDATE users SET password = ? WHERE id = ?", (pw_hash, user_id))
+        logging.info("Password reset for user %s", user_id)
+        return True
+    except Exception:
+        logging.exception("DB error in reset_password")
+        return False
