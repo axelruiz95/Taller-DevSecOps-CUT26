@@ -46,4 +46,4 @@ def create_user(username: str, password: str, email: str) -> dict:
             (username, hashed_password, email)
         )
         conn.commit()
-    return {"status": "created", "username": username}
+    return {"status": "created", "username": username} #
