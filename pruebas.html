@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taller DevSecOps CUT26 — Análisis de Ejercicios</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+      border-bottom: 2px solid #3b82f6;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #60a5fa;
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      color: #94a3b8;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-red    { background: #7f1d1d; color: #fca5a5; }
+    .badge-orange { background: #7c2d12; color: #fdba74; }
+    .badge-yellow { background: #713f12; color: #fde68a; }
+    .badge-blue   { background: #1e3a5f; color: #93c5fd; }
+    .badge-green  { background: #14532d; color: #86efac; }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .toc {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .toc h2 {
+      color: #60a5fa;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .toc ol {
+      columns: 2;
+      gap: 1.5rem;
+      padding-left: 1.25rem;
+    }
+
+    .toc li { margin-bottom: 0.4rem; }
+
+    .toc a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .toc a:hover { color: #60a5fa; }
+
+    .exercise {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+    }
+
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.75rem;
+      background: #151a27;
+      border-bottom: 1px solid #2d3748;
+      flex-wrap: wrap;
+    }
+
+    .exercise-number {
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .exercise-header h2 {
+      font-size: 1.1rem;
+      color: #e2e8f0;
+      flex: 1;
+    }
+
+    .exercise-header .file {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #60a5fa;
+      background: #0f1117;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #3b82f6;
+    }
+
+    .exercise-body {
+      padding: 1.75rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title.red    { color: #f87171; }
+    .section-title.green  { color: #34d399; }
+    .section-title.yellow { color: #fbbf24; }
+    .section-title.blue   { color: #60a5fa; }
+
+    .vuln-list {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .vuln-list li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: #0f1117;
+      border-left: 3px solid #ef4444;
+      font-size: 0.9rem;
+    }
+
+    .vuln-list li .icon { flex-shrink: 0; margin-top: 0.1rem; }
+
+    .fix-list {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .fix-list li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: #0f1117;
+      border-left: 3px solid #10b981;
+      font-size: 0.9rem;
+    }
+
+    .fix-list li .icon { flex-shrink: 0; margin-top: 0.1rem; }
+
+    code {
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #fbbf24;
+      border: 1px solid #2d3748;
+    }
+
+    pre {
+      background: #0d1117;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+
+    pre .comment { color: #6b7280; }
+    pre .keyword { color: #c084fc; }
+    pre .string  { color: #34d399; }
+    pre .fn      { color: #60a5fa; }
+    pre .number  { color: #fb923c; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2d3748;
+      margin: 1.5rem 0;
+    }
+
+    .sonar-box {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sonar-box h4 {
+      color: #fbbf24;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .sonar-rule {
+      display: inline-block;
+      background: #1a1f2e;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      margin: 0.2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #4b5563;
+      font-size: 0.82rem;
+      border-top: 1px solid #1f2937;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Taller DevSecOps — CUT26</h1>
+  <p>Análisis de vulnerabilidades, code smells y mejoras recomendadas por ejercicio</p>
+  <div class="badge-row">
+    <span class="badge badge-red">Vulnerabilidades de Seguridad</span>
+    <span class="badge badge-orange">Code Smells</span>
+    <span class="badge badge-yellow">Bugs de Lógica</span>
+    <span class="badge badge-blue">Análisis SonarQube</span>
+    <span class="badge badge-green">Mejoras Recomendadas</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ÍNDICE -->
+  <div class="toc">
+    <h2>Índice de ejercicios</h2>
+    <ol>
+      <li><a href="#ej1">login.py — SQL Injection &amp; Credenciales</a></li>
+      <li><a href="#ej2">payment.js — Complejidad &amp; Duplicación</a></li>
+      <li><a href="#ej3">file_processor.py — Path Traversal &amp; XXE</a></li>
+      <li><a href="#ej4">api_client.py — Deserialización Insegura</a></li>
+      <li><a href="#ej5">user_profile.js — XSS &amp; Prototype Pollution</a></li>
+      <li><a href="#ej6">auth_token.py — PRNG Inseguro &amp; SSRF</a></li>
+      <li><a href="#ej7">jwt_service.js — JWT &amp; Criptografía Débil</a></li>
+      <li><a href="#ej8">report_generator.py — SSRF &amp; Template Injection</a></li>
+      <li><a href="#ej9">search_service.js — NoSQL Injection &amp; ReDoS</a></li>
+      <li><a href="#ej10">config_loader.py — YAML ACE &amp; Command Injection</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 1 -->
+  <div class="exercise" id="ej1">
+    <div class="exercise-header">
+      <div class="exercise-number">1</div>
+      <h2>Autenticación y gestión de usuarios</h2>
+      <span class="file">ejercicio1/login.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>SQL Injection (x3)</strong> — Las funciones <code>get_user</code>, <code>reset_password</code> y <code>create_user</code> construyen consultas SQL con f-strings directamente desde input del usuario. Un atacante puede inyectar <code>' OR '1'='1</code> para eludir la autenticación o destruir la base de datos.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Credenciales hardcodeadas</strong> — <code>DB_PASSWORD = "admin123"</code> y <code>SECRET_KEY = "mysecretkey"</code> están en texto plano en el código fuente y aparecerán en el historial de Git para siempre.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Contraseña en texto plano</strong> — <code>user[2] == password</code> compara la contraseña recibida contra el valor almacenado en la base de datos sin hash, lo que significa que las contraseñas se guardan en claro.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Contraseña expuesta en logs</strong> — <code>print(f"Password reset for user {user_id}: {new_pass}")</code> registra la nueva contraseña en el log del sistema.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Resource leak</strong> — Varias conexiones <code>sqlite3.connect()</code> no se cierran explícitamente, lo que puede causar bloqueos de base de datos bajo carga.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S3649</span>
+        <span class="sonar-rule">python:S2068</span>
+        <span class="sonar-rule">python:S6437</span>
+        <span class="sonar-rule">python:S2077</span>
+        <span class="sonar-rule">python:S4507</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Usar <strong>consultas parametrizadas</strong>: <code>conn.execute("SELECT * FROM users WHERE username=?", (username,))</code></div></li>
+        <li><span class="icon">✅</span><div>Almacenar secretos en <strong>variables de entorno</strong> o un gestor de secretos (HashiCorp Vault, AWS Secrets Manager).</div></li>
+        <li><span class="icon">✅</span><div>Hashear contraseñas con <strong>bcrypt o argon2</strong>: <code>bcrypt.checkpw(password.encode(), stored_hash)</code></div></li>
+        <li><span class="icon">✅</span><div>Nunca loguear datos sensibles. Registrar solo el <code>user_id</code>.</div></li>
+        <li><span class="icon">✅</span><div>Usar <strong>context managers</strong> (<code>with sqlite3.connect(...) as conn:</code>) para garantizar el cierre de conexiones.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">import</span> sqlite3, bcrypt, os
+
+<span class="fn">def</span> <span class="fn">get_user</span>(username: str, password: str) -> dict:
+    <span class="keyword">with</span> sqlite3.connect(os.environ[<span class="string">"DATABASE_URL"</span>]) <span class="keyword">as</span> conn:
+        cursor = conn.execute(
+            <span class="string">"SELECT id, username, password_hash FROM users WHERE username=?"</span>,
+            (username,)
+        )
+        user = cursor.fetchone()
+
+    <span class="keyword">if</span> user <span class="keyword">and</span> bcrypt.checkpw(password.encode(), user[<span class="number">2</span>]):
+        <span class="keyword">return</span> {<span class="string">"status"</span>: <span class="string">"ok"</span>, <span class="string">"user"</span>: {<span class="string">"id"</span>: user[<span class="number">0</span>], <span class="string">"username"</span>: user[<span class="number">1</span>]}}
+    <span class="keyword">return</span> {<span class="string">"status"</span>: <span class="string">"error"</span>, <span class="string">"message"</span>: <span class="string">"Invalid credentials"</span>}</pre>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 2 -->
+  <div class="exercise" id="ej2">
+    <div class="exercise-header">
+      <div class="exercise-number">2</div>
+      <h2>Procesador de pagos</h2>
+      <span class="file">ejercicio2/payment.js</span>
+      <span class="badge badge-orange">Code Smell</span>
+      <span class="badge badge-yellow">Bug</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Problemas encontrados</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>NullPointerException</strong> — <code>chargeCard</code> pasa <code>null</code> como primer argumento a <code>processPayment</code>, que al no encontrar <code>user != null</code>, devuelve <code>undefined</code>. La línea siguiente <code>result.total</code> lanza un error de tipo en runtime.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Complejidad cognitiva excesiva</strong> — Cuatro niveles de <code>if</code> anidados en <code>processPayment</code> superan el umbral recomendado de Sonar (por defecto 15). El código es difícil de leer, testear y mantener.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Código duplicado</strong> — Los bloques de <code>credit</code> y <code>debit</code> son idénticos (misma fórmula de comisión <code>* 0.03</code>). Cualquier cambio en la comisión debe hacerse en dos lugares.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Igualdad laxa (<code>==</code> vs <code>===</code>)</strong> — Comparaciones con <code>==</code> en JavaScript permiten coerciones de tipo inesperadas: <code>"0" == false</code> es <code>true</code>.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Sin return explícito en fallo</strong> — Si ninguna condición se cumple, la función devuelve <code>undefined</code> silenciosamente en lugar de un error descriptivo.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">javascript:S3776</span>
+        <span class="sonar-rule">javascript:S1764</span>
+        <span class="sonar-rule">javascript:S1940</span>
+        <span class="sonar-rule">javascript:S116</span>
+        <span class="sonar-rule">javascript:S1126</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Extraer la lógica de comisión a una función <code>applyFee(total)</code> para eliminar la duplicación.</div></li>
+        <li><span class="icon">✅</span><div>Usar <strong>cláusulas de guarda</strong> (early return) para aplanar el anidamiento.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar todos los <code>==</code> por <code>===</code>.</div></li>
+        <li><span class="icon">✅</span><div>Añadir un <code>return null</code> o lanzar un <code>Error</code> explícito cuando los parámetros son inválidos.</div></li>
+        <li><span class="icon">✅</span><div>Validar que <code>user</code> no sea <code>null</code> en el llamador antes de invocar la función.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">function</span> <span class="fn">applyFee</span>(total) {
+  <span class="keyword">return</span> total + total * <span class="number">0.03</span>;
+}
+
+<span class="keyword">function</span> <span class="fn">processPayment</span>(user, amount, type, currency, discount, tax) {
+  <span class="keyword">if</span> (!user || amount <= <span class="number">0</span>) <span class="keyword">return</span> { status: <span class="string">"error"</span>, message: <span class="string">"Invalid input"</span> };
+  <span class="keyword">if</span> (type !== <span class="string">"credit"</span> && type !== <span class="string">"debit"</span>) <span class="keyword">return</span> { status: <span class="string">"error"</span>, message: <span class="string">"Unknown type"</span> };
+  <span class="keyword">if</span> (currency !== <span class="string">"MXN"</span> && currency !== <span class="string">"USD"</span>) <span class="keyword">return</span> { status: <span class="string">"error"</span>, message: <span class="string">"Unknown currency"</span> };
+
+  <span class="keyword">let</span> total = amount - (discount ?? <span class="number">0</span>) + (tax ?? <span class="number">0</span>);
+  total = applyFee(total);
+  <span class="keyword">return</span> { status: <span class="string">"ok"</span>, total, type, currency };
+}</pre>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 3 -->
+  <div class="exercise" id="ej3">
+    <div class="exercise-header">
+      <div class="exercise-number">3</div>
+      <h2>Procesador de archivos</h2>
+      <span class="file">ejercicio3/file_processor.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>Path Traversal</strong> — <code>save_file(filename, content)</code> acepta rutas como <code>../../etc/passwd</code>. Aunque se use <code>os.path.join</code>, si <code>filename</code> empieza con <code>/</code> o contiene <code>../</code>, el atacante puede escribir en cualquier directorio del servidor.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Command Injection</strong> — <code>list_user_files</code> inserta directamente el input del usuario en <code>os.system()</code>. Un valor como <code>; rm -rf /</code> ejecutaría comandos destructivos en el servidor.</div></li>
+        <li><span class="icon">🔴</span><div><strong>XXE (XML External Entity)</strong> — <code>ET.fromstring(xml_string)</code> procesa entidades XML externas por defecto en versiones antiguas de Python. Un atacante puede leer archivos del sistema o realizar SSRF mediante entidades como <code>&amp;xxe;</code>.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Hash débil (MD5)</strong> — MD5 está considerado criptográficamente roto desde 2004. No debe usarse para verificar integridad de archivos críticos ni como identificador seguro.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S2083</span>
+        <span class="sonar-rule">python:S2076</span>
+        <span class="sonar-rule">python:S2755</span>
+        <span class="sonar-rule">python:S4790</span>
+        <span class="sonar-rule">python:S4423</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Sanitizar el nombre de archivo: usar <code>os.path.basename(filename)</code> y verificar que la ruta resuelta empiece con <code>UPLOAD_DIR</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar <code>os.system()</code> por <code>subprocess.run(["ls", safe_path], capture_output=True)</code> con lista de argumentos (sin shell).</div></li>
+        <li><span class="icon">✅</span><div>Para XML, usar <code>defusedxml</code>: <code>import defusedxml.ElementTree as ET</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar MD5 por <strong>SHA-256</strong>: <code>hashlib.sha256(content.encode()).hexdigest()</code>.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">import</span> hashlib, os, subprocess
+<span class="keyword">import</span> defusedxml.ElementTree <span class="keyword">as</span> ET
+
+<span class="fn">def</span> <span class="fn">save_file</span>(filename: str, content: str) -> str:
+    safe_name = os.path.basename(filename)
+    filepath  = os.path.join(UPLOAD_DIR, safe_name)
+    <span class="keyword">if</span> <span class="keyword">not</span> filepath.startswith(UPLOAD_DIR):
+        <span class="keyword">raise</span> ValueError(<span class="string">"Invalid filename"</span>)
+    <span class="keyword">with</span> <span class="keyword">open</span>(filepath, <span class="string">"w"</span>) <span class="keyword">as</span> f:
+        f.write(content)
+    <span class="keyword">return</span> filepath
+
+<span class="fn">def</span> <span class="fn">get_file_hash</span>(content: str) -> str:
+    <span class="keyword">return</span> hashlib.sha256(content.encode()).hexdigest()
+
+<span class="fn">def</span> <span class="fn">list_user_files</span>(subdirectory: str):
+    safe_sub = os.path.basename(subdirectory)
+    subprocess.run([<span class="string">"ls"</span>, os.path.join(UPLOAD_DIR, safe_sub)], check=<span class="keyword">True</span>)</pre>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 4 -->
+  <div class="exercise" id="ej4">
+    <div class="exercise-header">
+      <div class="exercise-number">4</div>
+      <h2>Cliente de API interna</h2>
+      <span class="file">ejercicio4/api_client.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>Deserialización insegura (pickle)</strong> — <code>pickle.loads(data)</code> ejecuta código Python arbitrario si el payload está controlado por el atacante. Es una de las vulnerabilidades más graves en Python.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Credenciales hardcodeadas</strong> — API key, URL base y contraseña de admin están embebidas en el código fuente. Cualquier persona con acceso al repositorio tiene acceso al sistema.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Verificación SSL desactivada</strong> — <code>verify=False</code> en todas las llamadas HTTP desactiva la validación del certificado TLS, exponiendo la comunicación a ataques de tipo Man-in-the-Middle.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Excepción demasiado amplia</strong> — <code>except Exception as e</code> captura todos los errores posibles (incluyendo <code>KeyboardInterrupt</code>, errores de red, errores de parseo) y devuelve <code>None</code>, ocultando el problema real.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Escritura en /tmp sin validación</strong> — Los archivos <code>.pkl</code> se guardan en <code>/tmp</code> con nombres predecibles basados en la clave, lo que puede facilitar un ataque de symlink.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S5135</span>
+        <span class="sonar-rule">python:S2068</span>
+        <span class="sonar-rule">python:S4830</span>
+        <span class="sonar-rule">python:S1192</span>
+        <span class="sonar-rule">python:S2221</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Reemplazar <code>pickle</code> por <strong>JSON</strong> o <strong>MessagePack</strong> para serialización de datos no confiables.</div></li>
+        <li><span class="icon">✅</span><div>Leer secretos desde variables de entorno: <code>os.environ["API_KEY"]</code>. Nunca commits de <code>.env</code>.</div></li>
+        <li><span class="icon">✅</span><div>Eliminar <code>verify=False</code>; usar la cadena de certificados correcta o un bundle CA personalizado.</div></li>
+        <li><span class="icon">✅</span><div>Capturar excepciones específicas: <code>except (requests.Timeout, requests.HTTPError) as e</code>.</div></li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 5 -->
+  <div class="exercise" id="ej5">
+    <div class="exercise-header">
+      <div class="exercise-number">5</div>
+      <h2>Perfil de usuario (frontend)</h2>
+      <span class="file">ejercicio5/user_profile.js</span>
+      <span class="badge badge-red">Crítico</span>
+      <span class="badge badge-orange">Code Smell</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>XSS (Cross-Site Scripting)</strong> — <code>innerHTML = userData.bio</code> y <code>innerHTML = "&lt;h1&gt;" + userData.name</code> insertan HTML sin sanitizar. Un atacante puede inyectar <code>&lt;script&gt;document.cookie&lt;/script&gt;</code> para robar sesiones.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Ejecución de código arbitrario (<code>eval</code>)</strong> — <code>eval(code)</code> ejecuta cualquier JavaScript, tanto del servidor como del usuario. Es una puerta de entrada directa para inyección de código.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Prototype Pollution</strong> — <code>mergeOptions</code> itera sobre todas las claves de <code>source</code> sin filtrar <code>__proto__</code> o <code>constructor</code>. Un atacante puede contaminar el prototipo global de Object y afectar toda la aplicación.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Variable local no utilizada</strong> — <code>let unused = score * 2</code> se declara pero nunca se usa, lo que indica código incompleto o un bug.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Función sin return implícito</strong> — <code>getDiscount</code> no tiene un return por defecto, devolviendo <code>undefined</code> si el usuario no es premium ni tiene créditos en cero.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">javascript:S5728</span>
+        <span class="sonar-rule">javascript:S1523</span>
+        <span class="sonar-rule">javascript:S6080</span>
+        <span class="sonar-rule">javascript:S1481</span>
+        <span class="sonar-rule">javascript:S1126</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Reemplazar <code>innerHTML</code> por <code>textContent</code> para texto plano, o usar una librería como <strong>DOMPurify</strong> para contenido HTML confiable.</div></li>
+        <li><span class="icon">✅</span><div>Eliminar <code>eval()</code>. Si se necesita ejecutar lógica dinámica, usar un pattern de comandos o una función de dispatch explícita.</div></li>
+        <li><span class="icon">✅</span><div>En <code>mergeOptions</code>, filtrar claves peligrosas: <code>if (key === '__proto__' || key === 'constructor') continue;</code></div></li>
+        <li><span class="icon">✅</span><div>Añadir <code>return 0;</code> como valor por defecto en <code>getDiscount</code>.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">function</span> <span class="fn">renderProfile</span>(userData) {
+  document.getElementById(<span class="string">"profile"</span>).textContent = userData.bio;
+  <span class="keyword">const</span> h1 = document.createElement(<span class="string">"h1"</span>);
+  h1.textContent = userData.name;
+  document.getElementById(<span class="string">"username"</span>).replaceChildren(h1);
+}
+
+<span class="keyword">function</span> <span class="fn">mergeOptions</span>(target, source) {
+  <span class="keyword">const</span> FORBIDDEN = <span class="keyword">new</span> Set([<span class="string">"__proto__"</span>, <span class="string">"constructor"</span>, <span class="string">"prototype"</span>]);
+  <span class="keyword">for</span> (<span class="keyword">const</span> key <span class="keyword">of</span> Object.keys(source)) {
+    <span class="keyword">if</span> (!FORBIDDEN.has(key)) target[key] = source[key];
+  }
+  <span class="keyword">return</span> target;
+}</pre>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 6 -->
+  <div class="exercise" id="ej6">
+    <div class="exercise-header">
+      <div class="exercise-number">6</div>
+      <h2>Generación de tokens de autenticación</h2>
+      <span class="file">ejercicio6/auth_token.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>PRNG inseguro</strong> — <code>random.randint()</code> no es criptográficamente seguro. Un atacante que conozca el estado del generador puede predecir todos los tokens futuros. Para seguridad usar <code>secrets</code>.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Seed predecible</strong> — <code>random.seed(user_id)</code> hace que el token de reset sea completamente determinista: conocer el <code>user_id</code> (dato público en muchos sistemas) es suficiente para calcular el token.</div></li>
+        <li><span class="icon">🔴</span><div><strong>SSRF / Open Redirect</strong> — <code>urllib.request.urlopen(url)</code> sin validación permite que el atacante haga que el servidor realice peticiones a recursos internos (<code>http://169.254.169.254/</code> en AWS) o a servicios externos.</div></li>
+        <li><span class="icon">🟠</span><div><strong>TOCTOU (Race Condition)</strong> — <code>os.path.exists(path)</code> y <code>open(path, "w")</code> no son atómicos. Entre las dos llamadas, otro proceso puede crear o eliminar el archivo, causando comportamiento impredecible.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Timing Attack</strong> — <code>token == sig</code> usa comparación de strings en tiempo variable (Python termina al primer carácter diferente), lo que permite a un atacante medir tiempos de respuesta para adivinar el token carácter a carácter.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S2245</span>
+        <span class="sonar-rule">python:S5144</span>
+        <span class="sonar-rule">python:S4036</span>
+        <span class="sonar-rule">python:S2755</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Usar <code>secrets.token_hex(32)</code> para todos los tokens de autenticación.</div></li>
+        <li><span class="icon">✅</span><div>Validar la URL contra una whitelist de dominios permitidos antes de realizar la petición.</div></li>
+        <li><span class="icon">✅</span><div>Usar <code>open(path, "x")</code> (modo exclusivo) en lugar del patrón exists+open para evitar TOCTOU.</div></li>
+        <li><span class="icon">✅</span><div>Usar <code>hmac.compare_digest(token, sig)</code> para comparaciones de tokens en tiempo constante.</div></li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 7 -->
+  <div class="exercise" id="ej7">
+    <div class="exercise-header">
+      <div class="exercise-number">7</div>
+      <h2>Servicio JWT y cifrado</h2>
+      <span class="file">ejercicio7/jwt_service.js</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>JWT sin verificación de firma</strong> — <code>verifyToken</code> solo comprueba que el token tenga 3 partes y decodifica el payload directamente, sin verificar nunca la firma HMAC. Cualquier token manipulado sería aceptado como válido.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Secreto JWT hardcodeado</strong> — <code>JWT_SECRET = "hardcoded_jwt_secret_123"</code> está en el código fuente. Un atacante puede firmar sus propios tokens con rol <code>admin</code>.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Criptografía débil (DES-ECB)</strong> — DES tiene clave de 56 bits (rompible por fuerza bruta) y el modo ECB no produce cifrado semánticamente seguro (bloques idénticos producen cifrado idéntico).</div></li>
+        <li><span class="icon">🟠</span><div><strong>HMAC con MD5</strong> — MD5 está roto criptográficamente. Para HMAC de JWT usar SHA-256 como mínimo.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Token completo en logs</strong> — <code>logAccess</code> imprime el token JWT completo. Cualquiera con acceso a los logs puede usar ese token para autenticarse.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">javascript:S2068</span>
+        <span class="sonar-rule">javascript:S4790</span>
+        <span class="sonar-rule">javascript:S5542</span>
+        <span class="sonar-rule">javascript:S4423</span>
+        <span class="sonar-rule">javascript:S5547</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Usar una librería JWT establecida como <strong>jsonwebtoken</strong> que maneje la verificación de firma correctamente.</div></li>
+        <li><span class="icon">✅</span><div>Cargar el secreto desde variable de entorno: <code>process.env.JWT_SECRET</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar DES-ECB por <strong>AES-256-GCM</strong>, que ofrece cifrado autenticado y es el estándar actual.</div></li>
+        <li><span class="icon">✅</span><div>En logs, registrar solo el <code>userId</code> y la fecha, nunca el token completo.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">const</span> jwt = require(<span class="string">"jsonwebtoken"</span>);
+
+<span class="keyword">function</span> <span class="fn">createToken</span>(userId, role) {
+  <span class="keyword">return</span> jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: <span class="string">"24h"</span>, algorithm: <span class="string">"HS256"</span> }
+  );
+}
+
+<span class="keyword">function</span> <span class="fn">verifyToken</span>(token) {
+  <span class="keyword">return</span> jwt.verify(token, process.env.JWT_SECRET);
+}
+
+<span class="keyword">function</span> <span class="fn">logAccess</span>(userId) {
+  console.log(`User ${userId} authenticated at ${<span class="keyword">new</span> Date().toISOString()}`);
+}</pre>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 8 -->
+  <div class="exercise" id="ej8">
+    <div class="exercise-header">
+      <div class="exercise-number">8</div>
+      <h2>Generador de reportes</h2>
+      <span class="file">ejercicio8/report_generator.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>SSRF (Server-Side Request Forgery)</strong> — <code>requests.get(url)</code> sin validación permite que el servidor realice peticiones a URLs internas como <code>http://169.254.169.254/latest/meta-data/</code> (metadata de AWS/GCP) o servicios en la red privada.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Template Injection</strong> — <code>template.format(**user_data)</code> con datos del usuario permite que un atacante use claves como <code>{__class__.__init__.__globals__}</code> para leer variables de entorno o ejecutar código.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Path Traversal en eliminación</strong> — <code>"/reports/" + path</code> sin normalizar permite eliminar archivos fuera del directorio de reportes.</div></li>
+        <li><span class="icon">🟠</span><div><strong>TOCTOU en archivo temporal</strong> — <code>tempfile.mktemp()</code> solo genera un nombre, no crea el archivo. Entre la generación del nombre y la apertura con <code>open()</code>, otro proceso puede crear un symlink malicioso.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Permisos excesivos</strong> — <code>os.chmod(tmp, 0o777)</code> da acceso de lectura, escritura y ejecución a todos los usuarios del sistema sobre el reporte generado.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Log Injection</strong> — <code>logging.info(f"User {user} requested: {url}")</code> con input del usuario puede falsificar entradas de log si el usuario incluye saltos de línea.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S5144</span>
+        <span class="sonar-rule">python:S2083</span>
+        <span class="sonar-rule">python:S5443</span>
+        <span class="sonar-rule">python:S4036</span>
+        <span class="sonar-rule">python:S5131</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Validar la URL contra una whitelist de hosts permitidos antes de hacer la petición.</div></li>
+        <li><span class="icon">✅</span><div>Para HTML dinámico, usar <strong>Jinja2</strong> con autoescape habilitado en lugar de <code>str.format()</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar <code>tempfile.mktemp()</code> por <code>tempfile.mkstemp()</code> que crea el archivo atómicamente.</div></li>
+        <li><span class="icon">✅</span><div>Usar <code>0o600</code> en lugar de <code>0o777</code> para archivos temporales con datos sensibles.</div></li>
+        <li><span class="icon">✅</span><div>Normalizar la ruta con <code>os.path.realpath()</code> y verificar que comience con el directorio base antes de eliminar.</div></li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 9 -->
+  <div class="exercise" id="ej9">
+    <div class="exercise-header">
+      <div class="exercise-number">9</div>
+      <h2>Servicio de búsqueda</h2>
+      <span class="file">ejercicio9/search_service.js</span>
+      <span class="badge badge-red">Crítico</span>
+      <span class="badge badge-orange">Code Smell</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>NoSQL Injection</strong> — <code>buildMongoQuery</code> inserta el input del usuario directamente en el objeto de query de MongoDB. Si el atacante envía <code>{ "$ne": null }</code> en lugar de un string, la query se convierte en "todos los usuarios cuyo username no sea null", omitiendo cualquier filtro de autenticación.</div></li>
+        <li><span class="icon">🔴</span><div><strong>ReDoS (Regular Expression Denial of Service)</strong> — El patrón <code>/^([a-zA-Z0-9]+)*@/</code> tiene cuantificadores anidados. Una cadena como <code>aaaaaaaaaaaaaaaa@</code> puede causar retroceso exponencial y bloquear el hilo de Node.js durante segundos o minutos.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Paginación sin límite</strong> — <code>paginateResults</code> ignora completamente <code>size</code> y <code>MAX_RESULTS</code>. Un atacante puede pedir la página 0 con size 0 y obtener todos los registros de la colección.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Condición muerta (dead code)</strong> — <code>code === "SAVE10" && code === "SAVE20"</code> es lógicamente imposible: una variable no puede ser dos valores distintos simultáneamente. Este bloque nunca se ejecuta.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Variable no utilizada</strong> — <code>let unused = data.length</code> se declara y nunca se referencia.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">javascript:S5334</span>
+        <span class="sonar-rule">javascript:S5852</span>
+        <span class="sonar-rule">javascript:S1481</span>
+        <span class="sonar-rule">javascript:S2583</span>
+        <span class="sonar-rule">javascript:S1764</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Validar que el filtro sea de tipo <code>string</code> antes de pasarlo a MongoDB: <code>if (typeof filter !== "string") throw new Error("Invalid filter");</code></div></li>
+        <li><span class="icon">✅</span><div>Reemplazar la regex vulnerable por una validación lineal con una librería como <strong>validator.js</strong>: <code>validator.isEmail(email)</code>.</div></li>
+        <li><span class="icon">✅</span><div>Aplicar el límite en la paginación: <code>const end = Math.min(start + size, start + MAX_RESULTS, results.length);</code></div></li>
+        <li><span class="icon">✅</span><div>Eliminar la condición imposible y la variable no usada.</div></li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EJERCICIO 10 -->
+  <div class="exercise" id="ej10">
+    <div class="exercise-header">
+      <div class="exercise-number">10</div>
+      <h2>Cargador de configuración</h2>
+      <span class="file">ejercicio10/config_loader.py</span>
+      <span class="badge badge-red">Crítico</span>
+    </div>
+    <div class="exercise-body">
+
+      <p class="section-title red">Vulnerabilidades encontradas</p>
+      <ul class="vuln-list">
+        <li><span class="icon">🔴</span><div><strong>Ejecución de código arbitrario (yaml.load)</strong> — <code>yaml.load(yaml_string)</code> sin un <code>Loader</code> seguro puede ejecutar código Python arbitrario mediante objetos YAML especiales como <code>!!python/object/apply:os.system ["rm -rf /"]</code>.</div></li>
+        <li><span class="icon">🔴</span><div><strong>LDAP Injection</strong> — <code>f"(uid={username})"</code> sin escape permite a un atacante inyectar filtros LDAP arbitrarios. Por ejemplo, <code>*)(uid=*))(|(uid=*</code> puede autenticar como cualquier usuario.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Command Injection</strong> — <code>"tar -czf backup.tar.gz " + directory</code> con <code>shell=True</code> permite ejecutar comandos adicionales si <code>directory</code> contiene <code>; rm -rf /</code>.</div></li>
+        <li><span class="icon">🔴</span><div><strong>Credencial hardcodeada</strong> — <code>SECRET_TOKEN</code> con un valor JWT en el código fuente es accesible a cualquiera con acceso al repositorio.</div></li>
+        <li><span class="icon">🟠</span><div><strong>Hash débil para contraseñas (SHA-1 sin sal)</strong> — SHA-1 es vulnerable a colisiones y, sin sal, susceptible a ataques de diccionario y rainbow tables. Las contraseñas hasheadas con SHA-1 pueden romperse rápidamente con herramientas como Hashcat.</div></li>
+        <li><span class="icon">🟡</span><div><strong>Función muerta</strong> — <code>dead_function()</code> nunca es invocada en el módulo. Código no alcanzable que aumenta la deuda técnica.</div></li>
+      </ul>
+
+      <p class="section-title yellow">Reglas SonarQube que se activan</p>
+      <div class="sonar-box">
+        <h4>Rules esperadas</h4>
+        <span class="sonar-rule">python:S5247</span>
+        <span class="sonar-rule">python:S2078</span>
+        <span class="sonar-rule">python:S2076</span>
+        <span class="sonar-rule">python:S2068</span>
+        <span class="sonar-rule">python:S2070</span>
+        <span class="sonar-rule">python:S1144</span>
+      </div>
+
+      <p class="section-title green">Mejoras recomendadas</p>
+      <ul class="fix-list">
+        <li><span class="icon">✅</span><div>Usar <code>yaml.safe_load(yaml_string)</code> que solo permite tipos YAML básicos y nunca ejecuta código.</div></li>
+        <li><span class="icon">✅</span><div>Escapar el input LDAP usando la librería <strong>ldap3</strong>: <code>escape_filter_chars(username)</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar la concatenación de strings por una lista de argumentos: <code>subprocess.run(["tar", "-czf", "backup.tar.gz", directory], check=True)</code> sin <code>shell=True</code>.</div></li>
+        <li><span class="icon">✅</span><div>Reemplazar SHA-1 por <strong>bcrypt</strong> o <strong>argon2</strong> para contraseñas, que incluyen sal automáticamente y están diseñados para ser lentos.</div></li>
+        <li><span class="icon">✅</span><div>Eliminar <code>dead_function()</code> o integrarla si tiene un propósito.</div></li>
+      </ul>
+
+      <p class="section-title blue">Código corregido (fragmento)</p>
+      <pre><span class="keyword">import</span> yaml, subprocess, bcrypt, os
+<span class="keyword">from</span> ldap3.utils.conv <span class="keyword">import</span> escape_filter_chars
+
+<span class="fn">def</span> <span class="fn">load_config</span>(yaml_string: str) -> dict:
+    <span class="keyword">return</span> yaml.safe_load(yaml_string)
+
+<span class="fn">def</span> <span class="fn">search_user</span>(ldap_conn, username: str):
+    safe_username = escape_filter_chars(username)
+    search_filter = f<span class="string">"(uid={safe_username})"</span>
+    <span class="keyword">return</span> ldap_conn.search_s(<span class="string">"dc=corp,dc=com"</span>, <span class="number">2</span>, search_filter)
+
+<span class="fn">def</span> <span class="fn">run_backup</span>(directory: str):
+    subprocess.run(
+        [<span class="string">"tar"</span>, <span class="string">"-czf"</span>, <span class="string">"backup.tar.gz"</span>, directory],
+        check=<span class="keyword">True</span>
+    )
+
+<span class="fn">def</span> <span class="fn">hash_password</span>(password: str) -> bytes:
+    <span class="keyword">return</span> bcrypt.hashpw(password.encode(), bcrypt.gensalt())</pre>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Taller DevSecOps CUT26 &mdash; Material educativo para análisis con SonarQube &mdash; 2026
+</footer>
+
+</body>
+</html>
